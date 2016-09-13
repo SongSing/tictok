@@ -17,5 +17,5 @@ window.onload = function() {
 
     f();
 
-    setInterval(f, 400);
+    setInterval(f, 500);
 };
