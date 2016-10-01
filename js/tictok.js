@@ -1,21 +1,64 @@
-window.onload = function() {
-    var f = function()
-    {
-        var wait = Date.parse("10/01/2016") - Date.now();
+var game;
+var titleState, gameState;
+var textManager;
 
-        var days = Math.floor(wait / (24 * 60 * 60 * 1000));
-        var hours = Math.floor(wait / (1000 * 60 * 60) % 24);
-        var minutes = Math.floor(wait / (1000 * 60) % 60);
-        var seconds = Math.floor(wait / 1000 % 60);
-
-        document.getElementById("countdown").innerHTML = 
-              days + " day" + (days === 1 ? "" : "s") + ", " 
-            + hours + " hour" + (hours === 1 ? "" : "s") + ", " 
-            + minutes + " minute" + (minutes === 1 ? "" : "s") + ", and " 
-            + seconds + " second" + (seconds === 1 ? "" : "s");
+function init() {
+    var gameSettings = {
+        imageSmoothing: false,
+        keys: {
+            primary: [ Key.z, Key.leftclick, Key.space ],
+            start: [ Key.enter ]
+        }
     };
 
-    f();
+    game  = new Game(document.getElementById("canvas"), -1, 960, 540, gameSettings);
+    textManager = new TextManager(game.canvas);
 
-    setInterval(f, 500);
-};
+    var ctx = game.canvas.context();
+
+    
+
+    titleState = new TitleState();
+    gameState = new GameState();
+
+    game.addState(titleState, true);
+    game.addState(gameState, true);
+
+    game.soundMuted = Storage.get("soundMuted", false);
+    game.musicMuted = Storage.get("musicMuted", false);
+
+    // load assets //
+
+    titleState.prepareAssets();
+    gameState.prepareAssets();
+
+    game.loadAssets(startTitle, loadProgressed);
+}
+
+function startTitle() {
+    titleState.assets.bleep.setMuted(game.soundMuted);
+    gameState.assets.tick.setMuted(game.soundMuted);
+    gameState.assets.tock.setMuted(game.soundMuted);
+
+    titleState.assets.theme.setMuted(game.musicMuted);
+    titleState.assets.ffft.setMuted(game.musicMuted);
+    gameState.assets.softtheme.setMuted(game.musicMuted);
+    
+    titleState.start();
+    game.start();
+}
+
+function startGame() {
+    gameState.start();
+    game.makeStateOnlyActive(gameState);
+}
+
+function loadProgressed(progress) {
+    game.canvas.fill("black");
+    game.canvas.fillRect(16, game.canvas.height() - 32, game.canvas.width() - 32, 16, "white");
+    game.canvas.fillRect(16, game.canvas.height() - 32, (game.canvas.width() - 32) * progress, 16, "#1144FF");
+}
+
+window.addEventListener("load", function() {
+    init();
+});
