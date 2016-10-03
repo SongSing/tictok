@@ -328,6 +328,7 @@ Game.prototype.loadAssets = function(callback, progress)
 
         let err = function(e) {
             WARN("Failed to load asset: " + a.src);
+            WARN(e);
         };
 
         a.fn(a.src, cb, err);
